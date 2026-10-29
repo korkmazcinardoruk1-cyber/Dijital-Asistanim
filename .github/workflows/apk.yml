@@ -1,0 +1,31 @@
+name: APK derle
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Capacitor projesini olustur
+        run: |
+          mkdir www && cp *.html www/index.html
+          npm init -y
+          npm i @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
+          npx cap init "Dijital Asistanim" com.dijitalasistanim.app --web-dir=www
+          npx cap add android
+          npx cap sync android
+      - name: APK derle
+        run: cd android && chmod +x gradlew && ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dijital-asistanim-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
